@@ -81,7 +81,7 @@ namespace AbraxisToolsetInstaller {
                 {
 
                     string managedDir = path + "/Necropolis_Data/Managed/";
-                    string backupDir = path + "/Necropolis_Data/Managed/Backup";
+                    string backupDir = path + "/Necropolis_Data/Managed/Backup/";
 
                     if( !Directory.Exists( backupDir ) ) {
                         string[] managedFiles = Directory.GetFiles( managedDir );
