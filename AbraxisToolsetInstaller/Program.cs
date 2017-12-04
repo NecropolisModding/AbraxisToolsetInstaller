@@ -14,7 +14,7 @@ namespace AbraxisToolsetInstaller {
 
         public static Random r;
 
-        public const string abraxisToolsetDownloadLink = "http://download936.mediafire.com/24855vhtbtmg/4xfurev714kj8ui/Assembly-CSharp.mm.dll";
+        public const string abraxisToolsetDownloadLink = "https://github.com/NecropolisModding/AbraxisToolset/releases/download/1.0/AbraxisToolset.dll";
 
         static void Main(string[] args) {
             r = new Random();
@@ -30,9 +30,9 @@ namespace AbraxisToolsetInstaller {
 
             DisplayIntroText();
 
-            DisplayText( "Braizen : I guess I'll have to help you set up, won't I, first-timer?" );
+            DisplayText( "Brazen : I guess I'll have to help you set up, won't I, first-timer?" );
             Thread.Sleep( 500 );
-            DisplayText( "Braizen : This may seem like an odd question... But where IS the Necropolis?" );
+            DisplayText( "Brazen : This may seem like an odd question... But where IS the Necropolis?" );
             Thread.Sleep( 200 );
             Console.WriteLine( "Enter the path to the Necropolis game. 'C:Program Files(x86)/steamapps/common/Necropolis' is a good place to check first." );
             Console.WriteLine();
@@ -52,11 +52,11 @@ namespace AbraxisToolsetInstaller {
                 }
 
                 if( !doesExist ) {
-                    DisplayText( "Braizen : There's... Nothing here." );
+                    DisplayText( "Brazen : There's... Nothing here." );
                     Console.WriteLine( "The directory you put in doesn't exist, try again" );
                     path = Console.ReadLine();
                 } else if( !isNecropolis ) {
-                    DisplayText( "Braizen : That doesn't look like the Necropolis" );
+                    DisplayText( "Brazen : That doesn't look like the Necropolis" );
                     Console.WriteLine( "The directory you put in isn't Necropolis. Make sure it's not Necropolis.exe or Necropolis_Data" );
                     path = Console.ReadLine();
                 }
@@ -64,61 +64,108 @@ namespace AbraxisToolsetInstaller {
                 isNecropolis = IsNecropolisFolder( path );
             }
 
-            DisplayText( "Braizen : Ah! There it is! Next, decide if you want to use a custom toolset, or Abraxis' own." );
-            Console.WriteLine( "Enter either [A] for Abraxis' toolset, or [C] for custom toolset" );
+            DisplayText( "Brazen : Ah! There it is! Next, decide if you want to use a custom toolset, or Abraxis' own." );
+            while( true ) {
+                Console.WriteLine( "Enter either [A] for Abraxis' toolset, or [C] for custom toolset. [U] will uninstall all toolsets" );
 
-            string readLine = Console.ReadLine();
+                string readLine = Console.ReadLine();
 
-            while( readLine != "A" && readLine != "C" ) {
-                Console.WriteLine( "Enter either [A] for Abraxis' toolset, or [C] for custom toolset" );
-                readLine = Console.ReadLine();
-            }
+                while( readLine != "A" && readLine != "C" && readLine != "U" ) {
+                    Console.WriteLine( "Enter either [A] for Abraxis' toolset, [C] for custom toolset, or [U] for uninstall" );
+                    readLine = Console.ReadLine();
+                }
 
-            string assemblyName = "Assembly-CSharp.dll";
+                string assemblyName = "Assembly-CSharp.dll";
 
-            //Abraxis toolset
-            if( readLine == "A" ) {
-
-                DisplayText( "Braizen : Abraxis' toolset it is! Let me get all the pieces here..." );
-                Console.WriteLine( "Downloading Abraxis' Toolset..." );
-
-                //Downloading process
+                //Backup files
                 {
-                    WebClient webClient = new WebClient();
-                    string dllPath = Environment.CurrentDirectory + "/Patching/Assembly-CSharp.mm.dll";
-                    if( File.Exists( dllPath ) )
-                        File.Delete( dllPath );
-                    webClient.DownloadFile( abraxisToolsetDownloadLink, dllPath );
+
+                    string managedDir = path + "/Necropolis_Data/Managed/";
+                    string backupDir = path + "/Necropolis_Data/Managed/Backup";
+
+                    if( !Directory.Exists( backupDir ) ) {
+                        string[] managedFiles = Directory.GetFiles( managedDir );
+
+
+                        foreach( string s in managedFiles ) {
+                            string newPath = backupDir + Path.GetFileName( s );
+                            File.Copy( s, newPath );
+                        }
+                    }
+
                 }
 
-                Console.ReadLine();
+                //Abraxis toolset
+                if( readLine == "A" ) {
 
-            } else { //Custom toolset
+                    DisplayText( "Brazen : Abraxis' toolset it is! Let me get all the pieces here..." );
+                    Console.WriteLine( "Downloading Abraxis' Toolset..." );
 
-                DisplayText( "Braizen : A custom one, eh? Just let me know where it is." );
-                Console.WriteLine( "Enter path to the mod .dll" );
+                    //Downloading process
+                    {
+                        WebClient webClient = new WebClient();
+                        string dllPath = Environment.CurrentDirectory + "/Patching/Assembly-CSharp.mm.dll";
+                        if( File.Exists( dllPath ) )
+                            File.Delete( dllPath );
+                        webClient.DownloadFile( abraxisToolsetDownloadLink, dllPath );
+                    }
 
-                string dllPath = Console.ReadLine();
+                } else if( readLine == "C" ) { //Custom toolset
 
-                while( !File.Exists( dllPath ) || Path.GetExtension( dllPath ) != ".dll" ) {
-                    DisplayText( "Braizen : That doesn't look like a toolbox to me..." );
+                    DisplayText( "Brazen : A custom one, eh? Just let me know where it is." );
                     Console.WriteLine( "Enter path to the mod .dll" );
-                    dllPath = Console.ReadLine();
+
+                    string dllPath = Console.ReadLine();
+
+                    while( !File.Exists( dllPath ) || Path.GetExtension( dllPath ) != ".dll" ) {
+                        DisplayText( "Brazen : That doesn't look like a toolbox to me..." );
+                        Console.WriteLine( "Enter path to the mod .dll" );
+                        dllPath = Console.ReadLine();
+                    }
+
+                    DisplayText( "Brazen : This should do just fine. Give me a few moments to move this around..." );
+                    if( File.Exists( Environment.CurrentDirectory + "/Patching/Assembly-CSharp.mm.dll" ) )
+                        File.Delete( Environment.CurrentDirectory + "/Patching/Assembly-CSharp.mm.dll" );
+                    File.Copy( dllPath, Environment.CurrentDirectory + "/Patching/Assembly-CSharp.mm.dll" );
+                } else {
+                    string mangedDir = path + "/Necropolis_Data/Managed/";
+                    string backupDir = path + "/Necropolis_Data/Managed/Backup";
+
+                    if( !Directory.Exists( backupDir ) ) {
+                        DisplayText( "Brazen : There's no backup! " );
+                        continue;
+                    }
+
+                    DisplayText( "Brazen : You want to restore to how the the Necropolis was before? I can do that." );
+                    DisplayText( "Brazen : Restoring..." );
+
+                    string[] backupFiles = Directory.GetFiles( backupDir );
+
+                    foreach( string s in backupFiles ) {
+                        string newPath = mangedDir + Path.GetFileName( s );
+
+                        if( File.Exists( newPath ) )
+                            File.Delete( newPath );
+
+                        File.Copy( s, newPath );
+                    }
+
+                    DisplayText( "Brazen : And we're done. The Necropolis has been restored to it's previous state!" );
+                    Console.WriteLine( "Press enter to exit." );
+
+                    Console.Read();
+                    return;
                 }
 
-                DisplayText( "Braizen : This should do just fine. Give me a few moments to move this around..." );
-                File.Copy(dllPath, Environment.CurrentDirectory + "/Patching/Assembly-CSharp.dll");
-            }
+                DisplayText( "Brazen : That's that! One last step, and we're done!" );
+                Thread.Sleep( 300 );
+                PatchGame( path );
 
-            DisplayText( "Braizen : That's that! One last step, and we're done!" );
-            Thread.Sleep(300);
-            PatchGame( path );
+                DisplayText( "Brazen : And we're done. Feel free to enter the Necropolis whenever you want now, the tools are all ready." );
+                Console.WriteLine( "Press enter to exit." );
 
-            DisplayText( "Braizen : And we're done. Feel free to enter the Necropolis whenever you want now, the tools are all ready." );
-            Console.WriteLine("Press any key to exit.");
-
-            while( Console.ReadKey().KeyChar == ' ') {
-
+                Console.Read();
+                return;
             }
         }
 
@@ -150,11 +197,9 @@ namespace AbraxisToolsetInstaller {
 
                 while( !mmProcess.HasExited )
                     Thread.Sleep( 100 );
-            } catch (System.Exception e){
+            } catch( System.Exception e ) {
                 Console.WriteLine( e );
             }
-
-            Console.ReadLine();
 
             //Delete temp files
             foreach( string s in tempFiles ) {
@@ -169,10 +214,10 @@ namespace AbraxisToolsetInstaller {
         }
 
         private static void DisplayIntroText() {
-            DisplayText( "Braizen : Oh... It looks like you've stumbled across some of the tools Abraxis used to create the Necropolis." );
-            DisplayText( "Braizen : Well aren't you clever? I suppose I don't mind if you use them. It'll help alleviate the boredom, that's for sure." );
+            DisplayText( "Brazen : Oh... It looks like you've stumbled across some of the tools Abraxis used to create the Necropolis." );
+            DisplayText( "Brazen : Well aren't you clever? I suppose I don't mind if you use them. It'll help alleviate the boredom, that's for sure." );
         }
-        public static void DisplayText(string s, bool newLine = true, float randomMin = 0f, float randomMax = 0f, int postWait = 200) {
+        public static void DisplayText(string s, bool newLine = true, float randomMin = 0.005f, float randomMax = 0.01f, int postWait = 200) {
             for( int i = 0; i < s.Length; i++ ) {
                 Console.Write( s[i] );
                 float rand = lerp( randomMin, randomMax, (float)r.NextDouble() );
