@@ -19,7 +19,12 @@ namespace AbraxisToolsetInstaller {
         static void Main(string[] args) {
             r = new Random();
 
-            FirstTimeTool();
+            try {
+                FirstTimeTool();
+            } catch(System.Exception e ) {
+                Console.WriteLine( e );
+                Console.WriteLine("Press any key to exit...");
+            }
 
             Console.ReadLine();
         }
@@ -85,7 +90,7 @@ namespace AbraxisToolsetInstaller {
 
                     if( !Directory.Exists( backupDir ) ) {
                         string[] managedFiles = Directory.GetFiles( managedDir );
-
+                        Directory.CreateDirectory( backupDir );
 
                         foreach( string s in managedFiles ) {
                             string newPath = backupDir + Path.GetFileName( s );
