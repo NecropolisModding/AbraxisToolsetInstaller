@@ -14,16 +14,20 @@ namespace AbraxisToolsetInstaller {
 
         public static Random r;
 
-        public const string abraxisToolsetDownloadLink = "https://github.com/NecropolisModding/AbraxisToolset/releases/download/1.0/AbraxisToolset.dll";
+        public const string abraxisToolsetDownloadLink = "https://github.com/NecropolisModding/AbraxisToolset/releases/download/1.5/";
+        public const string toolsetDLL = "AbraxisToolset.dll";
+        public const string discordDLL = "discord-rpc.dll";
+
+        public static bool isAbraxis = false;
 
         static void Main(string[] args) {
             r = new Random();
 
             try {
                 FirstTimeTool();
-            } catch(System.Exception e ) {
+            } catch( System.Exception e ) {
                 Console.WriteLine( e );
-                Console.WriteLine("Press any key to exit...");
+                Console.WriteLine( "Press any key to exit..." );
             }
 
             Console.ReadLine();
@@ -112,9 +116,16 @@ namespace AbraxisToolsetInstaller {
                         string dllPath = Environment.CurrentDirectory + "/Patching/Assembly-CSharp.mm.dll";
                         if( File.Exists( dllPath ) )
                             File.Delete( dllPath );
-                        webClient.DownloadFile( abraxisToolsetDownloadLink, dllPath );
+                        webClient.DownloadFile( abraxisToolsetDownloadLink + toolsetDLL, dllPath );
+
+                        if( !Directory.Exists( Environment.CurrentDirectory + "/Patching/Discord" ) )
+                            Directory.CreateDirectory( Environment.CurrentDirectory + "/Patching/Discord");
+
+                        dllPath = Environment.CurrentDirectory + "/Patching/Discord/discord-rpc.dll";
+                        webClient.DownloadFile( abraxisToolsetDownloadLink + discordDLL, dllPath );
                     }
 
+                    isAbraxis = true;
                 } else if( readLine == "C" ) { //Custom toolset
 
                     DisplayText( "Brazen : A custom one, eh? Just let me know where it is." );
@@ -123,7 +134,7 @@ namespace AbraxisToolsetInstaller {
                     string dllPath = Console.ReadLine();
 
                     while( !File.Exists( dllPath ) || Path.GetExtension( dllPath ) != ".dll" ) {
-                        DisplayText( "Brazen : That doesn't look like a toolbox to me..." );
+                        DisplayText( "Brazen : That doesn't look like a toolset to me..." );
                         Console.WriteLine( "Enter path to the mod .dll" );
                         dllPath = Console.ReadLine();
                     }
@@ -212,10 +223,16 @@ namespace AbraxisToolsetInstaller {
             }
 
             //Copy modified file back to Necropolis
-            if( File.Exists( gamePath + "/Necropolis_Data/Managed/" + "Assembly-CSharp.dll" ) )
-                File.Delete( gamePath + "/Necropolis_Data/Managed/" + "Assembly-CSharp.dll" );
-            File.Copy( patchingFolder + "MONOMODDED_Assembly-CSharp.dll", gamePath + "/Necropolis_Data/Managed/" + "Assembly-CSharp.dll" );
+            if( File.Exists( gamePath + "/Necropolis_Data/Managed/Assembly-CSharp.dll" ) )
+                File.Delete( gamePath + "/Necropolis_Data/Managed/Assembly-CSharp.dll" );
+            File.Copy( patchingFolder + "MONOMODDED_Assembly-CSharp.dll", gamePath + "/Necropolis_Data/Managed/Assembly-CSharp.dll" );
 
+            if( isAbraxis ) {
+                string discordDLLPath = gamePath + "/Necropolis_Data/Plugins/discord-rpc.dll";
+                if( File.Exists(discordDLLPath) )
+                    File.Delete( discordDLLPath );
+                File.Copy( patchingFolder + "Discord/discord-rpc.dll" , discordDLLPath);
+            }
         }
 
         private static void DisplayIntroText() {
